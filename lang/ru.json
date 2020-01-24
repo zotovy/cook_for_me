@@ -1,4 +1,8 @@
 {
+    "email": "Email",
+    "password": "Пароль",
+    "forgot_password": "Забыли пароль?",
+
     "intro_skip_button": "Пропустить",
     "intro_get_started_button": "Начать",
     "intro_first_title": "Готовьте из того, что у вас есть",
@@ -8,5 +12,10 @@
     "intro_third_title": "Планируете прием пищи и следите за диетой",
     "intro_third_description": "Гибкая настройка планов питания, которые лучше всегоподходит для ваше здоровья и образ жизни",
     "intro_fourth_title": "Готовьте без особых усилий",
-    "intro_fourth_description": "Готовьте с пошаговыми инструкциями.  Готовить легко и удобно!"
+    "intro_fourth_description": "Готовьте с пошаговыми инструкциями.  Готовить легко и удобно!",
+
+    "login_title": "Вход",
+    "login_link": "Зарегестрироваться",
+    "login_email_error": "Вы должны ввести email",
+    "login_password_error ": "Вы должны ввести пароль"
 }

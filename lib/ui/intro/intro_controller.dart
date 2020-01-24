@@ -136,7 +136,7 @@ class _IntroScreenState extends State<IntroScreen> {
         done: Text(
           AppLocalizations.of(context).translate('intro_get_started_button'),
         ),
-        onDone: () {},
+        onDone: () => Navigator.pushReplacementNamed(context, 'login_page'),
         showSkipButton: true,
         skip: Text(
           AppLocalizations.of(context).translate('intro_skip_button'),
