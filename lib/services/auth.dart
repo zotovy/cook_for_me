@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:food_app/data/userData.dart';
+import 'package:food_app/localization.dart';
+import 'package:food_app/services/database.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
@@ -13,22 +15,45 @@ class AuthService {
 
   static dynamic signUpUser(
     BuildContext context,
-    String name,
     String email,
     String _username,
     String password,
     GlobalKey<ScaffoldState> scaffoldKey,
   ) async {
     try {
-      print(email);
+      // Unique username check
+      bool isUsernameExists = await DatabaseServices.isUsernameUsed(_username);
+
+      if (isUsernameExists) {
+        scaffoldKey.currentState.showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.redAccent,
+            elevation: 0,
+            content: Container(
+              height: 25,
+              child: Center(
+                child: Text(
+                  AppLocalizations.of(context)
+                      .translate('error_username_already_exists'),
+                ),
+              ),
+            ),
+          ),
+        );
+        return null;
+      }
+
+      // Register user in Firebase Auth system
       AuthResult authResult = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      // Register user in Firebase storage system
       FirebaseUser signedInUser = authResult.user;
       if (signedInUser != null) {
         _firestore.collection('/users').document(signedInUser.uid).setData({
-          'name': name,
           'email': email,
           'profileImageUrl': '',
           'username': _username,
@@ -38,42 +63,55 @@ class AuthService {
         Navigator.pushReplacementNamed(context, 'home_page');
       }
     } catch (error) {
-      String errorMessage;
-      switch (error.message) {
-        case "ERROR_INVALID_EMAIL":
-          errorMessage = "Your email address appears to be malformed.";
-          break;
-        case "ERROR_WRONG_PASSWORD":
-          errorMessage = "Your password is wrong.";
-          break;
-        case "ERROR_USER_NOT_FOUND":
-          errorMessage = "User with this email doesn't exist.";
-          break;
-        case "ERROR_USER_DISABLED":
-          errorMessage = "User with this email has been disabled.";
-          break;
-        case "ERROR_TOO_MANY_REQUESTS":
-          errorMessage = "Too many requests. Try again later.";
-          break;
-        case "ERROR_OPERATION_NOT_ALLOWED":
-          errorMessage = "Signing in with Email and Password is not enabled.";
-          break;
-        default:
-          errorMessage = error.message;
+      bool isReceptive = true;
+      String message = '';
+
+      // Check receptive errors
+      if (error.message == 'The email address is badly formatted.') {
+        message =
+            AppLocalizations.of(context).translate('error_email_bad_formated');
+      } else if (error.message ==
+          'The email address is already in use by another account.') {
+        message = AppLocalizations.of(context)
+            .translate('error_email_already_exists');
+      } else {
+        isReceptive = false;
       }
-      scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.redAccent,
-          elevation: 0,
-          content: Container(
-            height: 25,
-            child: Center(
-              child: Text(errorMessage),
+
+      if (isReceptive) {
+        scaffoldKey.currentState.showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.redAccent,
+            elevation: 0,
+            content: Container(
+              height: 25,
+              child: Center(
+                child: Text(message),
+              ),
             ),
           ),
-        ),
-      );
+        );
+        logger.i(
+          'Failed to signup: $email with $password \nTime: ${DateTime.now()}',
+        );
+      } else {
+        scaffoldKey.currentState.showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.redAccent,
+            elevation: 0,
+            content: Container(
+              height: 25,
+              child: Center(
+                child: Text('Invald error happend. Please, try later'),
+              ),
+            ),
+          ),
+        );
+        logger.e(
+            'Signup error: ${error.message} \nTime:${DateTime.now()}\nVariables: \n   email: $email\n   password:$password');
+      }
     }
   }
 
@@ -95,11 +133,12 @@ class AuthService {
       String message = '';
       if (e.message ==
           'There is no user record corresponding to this identifier. The user may have been deleted.') {
-        message = 'Invalid email or password';
+        message =
+            AppLocalizations.of(context).translate('error_incorrect_password');
       } else if (e.message == 'The email address is badly formatted.') {
-        message = e.message;
+        message =
+            AppLocalizations.of(context).translate('error_email_bad_formated');
       } else {
-        logger.e('Login Error: $message');
         message = e.message;
         isReceptive = false;
       }
@@ -122,6 +161,17 @@ class AuthService {
           'Failed to login: $email with $password \nTime: ${DateTime.now()}',
         );
       } else {
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.redAccent,
+          elevation: 0,
+          content: Container(
+            height: 25,
+            child: Center(
+              child: Text('Invald error happend. Please, try later'),
+            ),
+          ),
+        );
         logger.e(
             'Login error: $message \nTime:${DateTime.now()}\nVariables: \n   email: $email\n   password:$password');
       }

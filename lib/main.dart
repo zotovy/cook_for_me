@@ -5,6 +5,7 @@ import 'package:food_app/ui/intro/home.dart';
 import 'package:food_app/ui/intro/intro_controller.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:food_app/ui/intro/login.dart';
+import 'package:food_app/ui/intro/signup.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
@@ -64,6 +65,7 @@ class MyApp extends StatelessWidget {
         home: _getPage(),
         routes: {
           LoginScreen.id: (_) => LoginScreen(),
+          SignUpScreen.id: (_) => SignUpScreen(),
           HomePage.id: (_) => HomePage(),
         },
       ),

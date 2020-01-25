@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:food_app/services/auth.dart';
 
 class HomePage extends StatefulWidget {
   static final String id = 'home_page';
@@ -12,7 +13,10 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text('lol'),
+        child: RaisedButton(
+          child: Text('logout'),
+          onPressed: () => AuthService.logout(),
+        ),
       ),
     );
   }

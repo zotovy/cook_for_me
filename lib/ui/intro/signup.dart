@@ -3,14 +3,14 @@ import 'package:food_app/localization.dart';
 import 'package:food_app/services/auth.dart';
 import 'package:food_app/widgets/progress_bar.dart';
 
-class LoginScreen extends StatefulWidget {
-  static final String id = 'login_page';
+class SignUpScreen extends StatefulWidget {
+  static final String id = 'signup_page';
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _SignUpScreenState createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   // Services
   bool isLoading = false;
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -19,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String _email = '';
   String _password = '';
+  String _username = '';
 
   // Submit lofin form
   _submit() async {
@@ -27,7 +28,8 @@ class _LoginScreenState extends State<LoginScreen> {
         isLoading = true;
       });
       _formKey.currentState.save();
-      await AuthService.login(_email, _password, _scaffoldKey, context);
+      await AuthService.signUpUser(
+          context, _email, _username, _password, _scaffoldKey);
       setState(() {
         isLoading = false;
       });
@@ -39,8 +41,8 @@ class _LoginScreenState extends State<LoginScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        key: _scaffoldKey,
         appBar: isLoading ? ProgressBar() : null,
+        key: _scaffoldKey,
         body: Container(
           child: Form(
             key: _formKey,
@@ -49,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  AppLocalizations.of(context).translate('login_title'),
+                  AppLocalizations.of(context).translate('signup_title'),
                   style: TextStyle(
                     color: Color(0xFF282828),
                     fontSize: 28,
@@ -66,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextFormField(
                     validator: (value) => value == ''
                         ? AppLocalizations.of(context)
-                            .translate('login_email_error')
+                            .translate('signup_email_error')
                         : null,
                     onSaved: (value) => setState(() => _email = value),
                     decoration: InputDecoration(
@@ -92,7 +94,33 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextFormField(
                     validator: (value) => value == ''
                         ? AppLocalizations.of(context)
-                            .translate('login_password_error')
+                            .translate('login_username_error')
+                        : null,
+                    onSaved: (value) => setState(() => _username = value),
+                    decoration: InputDecoration(
+                      labelText:
+                          AppLocalizations.of(context).translate('username'),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black12, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Color(0x11000000),
+                  ),
+                  margin: EdgeInsets.symmetric(horizontal: 28),
+                  child: TextFormField(
+                    validator: (value) => value.length < 6
+                        ? AppLocalizations.of(context)
+                            .translate('signup_password_error')
                         : null,
                     onSaved: (value) => setState(() => _password = value),
                     decoration: InputDecoration(
@@ -126,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Center(
                           child: Text(
                             AppLocalizations.of(context)
-                                .translate('login_title'),
+                                .translate('signup_title'),
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 18,
@@ -158,10 +186,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       GestureDetector(
                         onTap: () => Navigator.pushReplacementNamed(
                           context,
-                          'signup_page',
+                          'login_page',
                         ),
                         child: Text(
-                          AppLocalizations.of(context).translate('login_link'),
+                          AppLocalizations.of(context).translate('signup_link'),
                         ),
                       ),
                     ],
