@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:food_app/localization.dart';
-import 'package:food_app/ui/intro/home.dart';
-import 'package:food_app/ui/intro/intro_controller.dart';
+import 'package:food_app/ui/home.dart';
+import 'package:food_app/ui/intro.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:food_app/ui/intro/login.dart';
-import 'package:food_app/ui/intro/signup.dart';
+import 'package:food_app/ui/login.dart';
+import 'package:food_app/ui/signup.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
@@ -20,11 +20,13 @@ class MyApp extends StatelessWidget {
     return StreamBuilder<FirebaseUser>(
       stream: FirebaseAuth.instance.onAuthStateChanged,
       builder: (BuildContext context, snapshot) {
-        if (snapshot.hasData) {
+        if (snapshot.hasData && snapshot.data != null) {
           Provider.of<UserData>(context).currentUserId = snapshot.data.uid;
           return HomePage();
+        } else if (snapshot.hasData && snapshot.data.uid == null) {
+          return IntroScreen();
         } else {
-          return LoginScreen();
+          return Scaffold();
         }
       },
     );

@@ -29,6 +29,17 @@
     "signup_link": "Login",
     "signup_email_error": "Please, enter your email",
     "signup_password_error": "Invalid password: Min length is 6",
-    "signup_username_error": "Please, enter your login"
+    "signup_username_error": "Please, enter your login",
+
+    "home_title": "Home",
+    "home_timeRec_first_title": "Breakfast Recipes",
+    "home_timeRec_first_subtitle": "Most important meal\nof the day",
+    "home_timeRec_second_title": "Lunch Recipes",
+    "home_timeRec_second_subtitle": "Hungry already? Find\ndelicious luch recipes here.",
+    "home_timeRec_third_title": "Snack Recipes",
+    "home_timeRec_third_subtitle": "Who doen't like to\nmunch often?",
+    "home_timeRec_fourth_title": "Dinner Recipes",
+    "home_timeRec_fourth_subtitle": "Is there a better way to end a day?"
+
 
 }

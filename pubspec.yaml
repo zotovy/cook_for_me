@@ -26,6 +26,7 @@ dependencies:
   # Services & Logic
   provider: ^4.0.2
   logger: ^0.8.3
+  cached_network_image: ^2.0.0
 
   # UI
   cupertino_icons: ^0.1.2

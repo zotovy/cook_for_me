@@ -28,5 +28,15 @@
     "signup_link": "Войти",
     "signup_email_error": "Пожалуйста, введите email",
     "signup_password_error": "Неверный формат. Минимальная длина пароля 6 символов",
-    "signup_login_error": "Пожалуйста, введите логин"
+    "signup_login_error": "Пожалуйста, введите логин",
+
+    "home_title": "Главная",
+    "home_timeRec_first_title": "Завтрак",
+    "home_timeRec_first_subtitle": "Главное время дня:)",
+    "home_timeRec_second_title": "Обед",
+    "home_timeRec_second_subtitle": "Все еще голодны? Поищите что-нибудь здесь",
+    "home_timeRec_third_title": "Снэки",
+    "home_timeRec_third_subtitle": "Кто не любит пожевать?",
+    "home_timeRec_fourth_title": "Ужин",
+    "home_timeRec_fourth_subtitle": "Разве есть способ лучше закончить день?"
 }
