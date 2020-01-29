@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:food_app/data/userData.dart';
 import 'package:food_app/localization.dart';
+import 'package:food_app/models/user.dart';
 import 'package:food_app/services/database.dart';
+import 'package:food_app/ui/home.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
@@ -60,7 +62,15 @@ class AuthService {
         });
         Provider.of<UserData>(context, listen: false).currentUserId =
             signedInUser.uid;
-        Navigator.pushReplacementNamed(context, 'home_page');
+
+        User user =
+            User.fromDoc(await DatabaseServices.getUserById(signedInUser.uid));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => HomePage(user),
+          ),
+        );
       }
     } catch (error) {
       bool isReceptive = true;
@@ -126,8 +136,17 @@ class AuthService {
     BuildContext context,
   ) async {
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
-      Navigator.pushReplacementNamed(context, 'home_page');
+      AuthResult result = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
+
+      var getResult = await DatabaseServices.getUserById(result.user.uid);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => HomePage(getResult),
+        ),
+      );
     } catch (e) {
       bool isReceptive = true;
       String message = '';

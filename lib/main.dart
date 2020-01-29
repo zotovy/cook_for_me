@@ -7,6 +7,7 @@ import 'package:food_app/ui/intro.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:food_app/ui/login.dart';
 import 'package:food_app/ui/signup.dart';
+import 'package:food_app/util/contants.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
@@ -16,13 +17,19 @@ void main() => runApp(MyApp());
 
 Logger logger = Logger();
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   Widget _getPage() {
     return StreamBuilder<FirebaseUser>(
-      stream: FirebaseAuth.instance.onAuthStateChanged,
-      builder: (BuildContext context, snapshot) {
-        if (snapshot.hasData && snapshot.data != null) {
-          Provider.of<UserData>(context).currentUserId = snapshot.data.uid;
+      stream: auth.onAuthStateChanged,
+      builder: (BuildContext context, streamSnapshot) {
+        if (streamSnapshot.hasData) {
+          Provider.of<UserData>(context).currentUserId =
+              streamSnapshot.data.uid;
           return FutureBuilder(
             future: DatabaseServices.getUserById(
                 Provider.of<UserData>(context).currentUserId),
@@ -39,10 +46,12 @@ class MyApp extends StatelessWidget {
               }
             },
           );
-        } else if (snapshot.hasData && snapshot.data.uid == null) {
+        } else if (streamSnapshot.hasData && streamSnapshot.data.uid == null) {
           return IntroScreen();
         } else {
-          return Scaffold();
+          return Scaffold(
+            body: Text('loadoimg'),
+          );
         }
       },
     );

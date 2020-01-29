@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:food_app/data/userData.dart';
 import 'package:food_app/localization.dart';
@@ -260,6 +261,10 @@ class _FeedPageState extends State<FeedPage> {
         children: <Widget>[
           _buildGoodAfternoonText(),
           _buildRecipesBasedOnTime(),
+          GestureDetector(
+            onTap: () async => await AuthService.logout(),
+            child: Text('logout'),
+          ),
         ],
       ),
     );
