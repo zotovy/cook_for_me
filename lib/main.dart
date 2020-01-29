@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:food_app/localization.dart';
+import 'package:food_app/services/database.dart';
 import 'package:food_app/ui/home.dart';
 import 'package:food_app/ui/intro.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -22,7 +23,22 @@ class MyApp extends StatelessWidget {
       builder: (BuildContext context, snapshot) {
         if (snapshot.hasData && snapshot.data != null) {
           Provider.of<UserData>(context).currentUserId = snapshot.data.uid;
-          return HomePage();
+          return FutureBuilder(
+            future: DatabaseServices.getUserById(
+                Provider.of<UserData>(context).currentUserId),
+            builder: (BuildContext context, snapshot) {
+              switch (snapshot.connectionState) {
+                case ConnectionState.waiting:
+                  return Scaffold(
+                    body: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                default:
+                  return HomePage(snapshot.data);
+              }
+            },
+          );
         } else if (snapshot.hasData && snapshot.data.uid == null) {
           return IntroScreen();
         } else {
@@ -68,7 +84,6 @@ class MyApp extends StatelessWidget {
         routes: {
           LoginScreen.id: (_) => LoginScreen(),
           SignUpScreen.id: (_) => SignUpScreen(),
-          HomePage.id: (_) => HomePage(),
         },
       ),
     );

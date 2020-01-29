@@ -10,155 +10,25 @@ import 'package:food_app/widgets/tags_bar.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
-  static final String id = 'home_page';
+  final User user;
+
+  HomePage(this.user);
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  User user = User();
-
   // Services
-  PageController _timeRecipesController;
+  int _currentPage = 0;
+  List<Widget> pages;
 
   @override
   void initState() {
     super.initState();
-    _timeRecipesController = PageController(initialPage: _getPageBasedOnTime());
-  }
-
-  _showError() {}
-
-  _getPageBasedOnTime() {
-    int currentHour = DateTime.now().hour;
-    int page;
-
-    if (0 <= currentHour && currentHour <= 9) {
-      // Breakfast
-      page = 0;
-    } else if (10 <= currentHour && currentHour <= 13) {
-      // Lunch
-      page = 1;
-    } else if (14 <= currentHour && currentHour <= 16) {
-      //  Snack
-      page = 2;
-    } else if (17 <= currentHour && currentHour <= 24) {
-      // Evening
-      page = 3;
-    }
-
-    return page;
-  }
-
-  Widget _buildBody(User user) {
-    return ListView(
-      children: <Widget>[
-        // "Good afternoon" text
-        Container(
-          height: 100,
-          margin: EdgeInsets.symmetric(vertical: 15),
-          padding: EdgeInsets.symmetric(horizontal: 68),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Image(
-                image: AssetImage('assets/images/good_afternoon.png'),
-                height: 50,
-              ),
-              Container(
-                  height: double.infinity,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        'Good Afternoon!',
-                        style: TextStyle(
-                          color: Color(0xFF282828),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 22,
-                        ),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        'What would you like to have?',
-                        style: TextStyle(
-                          color: Color(0xFF565656),
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  )),
-            ],
-          ),
-        ),
-
-        // Recipes, based on time
-        Container(
-          width: double.infinity,
-          height: 150,
-          margin: EdgeInsets.symmetric(vertical: 10),
-          child: PageView(
-            controller: _timeRecipesController,
-            children: <Widget>[
-              // Breakfast
-              FoodBasedOnTimeCard(
-                bg: LinearGradient(
-                  colors: [Color(0xFFFE95B1), Color(0xFFFFA881)],
-                ),
-                title: AppLocalizations.of(context)
-                    .translate('home_timeRec_first_title'),
-                subtitle: AppLocalizations.of(context)
-                    .translate('home_timeRec_first_subtitle'),
-                image: AssetImage('assets/images/breakfast.png'),
-                keyword: 'breakfast',
-              ),
-
-              // Lunch
-              FoodBasedOnTimeCard(
-                bg: LinearGradient(
-                  colors: [Color(0xFF81C3F6), Color(0xFFA397FE)],
-                ),
-                title: AppLocalizations.of(context)
-                    .translate('home_timeRec_second_title'),
-                subtitle: AppLocalizations.of(context)
-                    .translate('home_timeRec_second_subtitle'),
-                image: AssetImage('assets/images/lunch.png'),
-                keyword: 'lunch',
-              ),
-
-              // Snacks
-              FoodBasedOnTimeCard(
-                bg: LinearGradient(
-                  colors: [Color(0xFFFF946E), Color(0xFFFC7E72)],
-                ),
-                title: AppLocalizations.of(context)
-                    .translate('home_timeRec_third_title'),
-                subtitle: AppLocalizations.of(context)
-                    .translate('home_timeRec_third_subtitle'),
-                image: AssetImage('assets/images/sneaks.png'),
-                keyword: 'snacks',
-              ),
-
-              // Dinner
-              FoodBasedOnTimeCard(
-                bg: LinearGradient(
-                  colors: [Color(0xFF6E6FFD), Color(0xFF9767DC)],
-                ),
-                title: AppLocalizations.of(context)
-                    .translate('home_timeRec_fourth_title'),
-                subtitle: AppLocalizations.of(context)
-                    .translate('home_timeRec_fourth_subtitle'),
-                image: AssetImage('assets/images/dinner.png'),
-                keyword: 'dinner',
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
+    pages = [
+      FeedPage(widget.user),
+    ];
   }
 
   Widget _buildAppBar(User user) {
@@ -199,28 +69,199 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: DatabaseServices.getUserById(
-          Provider.of<UserData>(context).currentUserId),
-      builder: (BuildContext context, snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          default:
-            if (snapshot.hasError)
-              return _showError();
-            else {
-              return Scaffold(
-                appBar: _buildAppBar(snapshot.data),
-                body: _buildBody(snapshot.data),
-              );
-            }
-        }
-      },
+    return Scaffold(
+      appBar: _buildAppBar(widget.user),
+      body: pages[_currentPage],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentPage,
+        onTap: (int i) {
+          if (mounted) {
+            setState(() {
+              _currentPage = i;
+            });
+          }
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            title: Text('Home'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            title: Text('Meal Plan'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_basket),
+            title: Text('Shopping List'),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class FeedPage extends StatefulWidget {
+  static final String id = 'feed_screen';
+  final User user;
+
+  FeedPage(this.user);
+
+  @override
+  _FeedPageState createState() => _FeedPageState();
+}
+
+class _FeedPageState extends State<FeedPage> {
+  // Services
+  PageController _timeRecipesController;
+
+  @override
+  void initState() {
+    super.initState();
+    _timeRecipesController = PageController(initialPage: _getPageBasedOnTime());
+  }
+
+  _getPageBasedOnTime() {
+    int currentHour = DateTime.now().hour;
+    int page;
+
+    if (0 <= currentHour && currentHour <= 9) {
+      // Breakfast
+      page = 0;
+    } else if (10 <= currentHour && currentHour <= 13) {
+      // Lunch
+      page = 1;
+    } else if (14 <= currentHour && currentHour <= 16) {
+      //  Snack
+      page = 2;
+    } else if (17 <= currentHour && currentHour <= 24) {
+      // Evening
+      page = 3;
+    }
+
+    return page;
+  }
+
+  Widget _buildGoodAfternoonText() {
+    // "Good afternoon" text
+    return Container(
+      height: 100,
+      margin: EdgeInsets.symmetric(vertical: 15),
+      padding: EdgeInsets.symmetric(horizontal: 68),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Image(
+            image: AssetImage('assets/images/good_afternoon.png'),
+            height: 50,
+          ),
+          Container(
+              height: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'Good Afternoon!',
+                    style: TextStyle(
+                      color: Color(0xFF282828),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 22,
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    'What would you like to have?',
+                    style: TextStyle(
+                      color: Color(0xFF565656),
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecipesBasedOnTime() {
+    // Recipes, based on time
+    return Container(
+      width: double.infinity,
+      height: 150,
+      margin: EdgeInsets.symmetric(vertical: 10),
+      child: PageView(
+        controller: _timeRecipesController,
+        children: <Widget>[
+          // Breakfast
+          FoodBasedOnTimeCard(
+            bg: LinearGradient(
+              colors: [Color(0xFFFE95B1), Color(0xFFFFA881)],
+            ),
+            title: AppLocalizations.of(context)
+                .translate('home_timeRec_first_title'),
+            subtitle: AppLocalizations.of(context)
+                .translate('home_timeRec_first_subtitle'),
+            image: AssetImage('assets/images/breakfast.png'),
+            keyword: 'breakfast',
+          ),
+
+          // Lunch
+          FoodBasedOnTimeCard(
+            bg: LinearGradient(
+              colors: [Color(0xFF81C3F6), Color(0xFFA397FE)],
+            ),
+            title: AppLocalizations.of(context)
+                .translate('home_timeRec_second_title'),
+            subtitle: AppLocalizations.of(context)
+                .translate('home_timeRec_second_subtitle'),
+            image: AssetImage('assets/images/lunch.png'),
+            keyword: 'lunch',
+          ),
+
+          // Snacks
+          FoodBasedOnTimeCard(
+            bg: LinearGradient(
+              colors: [Color(0xFFFF946E), Color(0xFFFC7E72)],
+            ),
+            title: AppLocalizations.of(context)
+                .translate('home_timeRec_third_title'),
+            subtitle: AppLocalizations.of(context)
+                .translate('home_timeRec_third_subtitle'),
+            image: AssetImage('assets/images/sneaks.png'),
+            keyword: 'snacks',
+          ),
+
+          // Dinner
+          FoodBasedOnTimeCard(
+            bg: LinearGradient(
+              colors: [Color(0xFF6E6FFD), Color(0xFF9767DC)],
+            ),
+            title: AppLocalizations.of(context)
+                .translate('home_timeRec_fourth_title'),
+            subtitle: AppLocalizations.of(context)
+                .translate('home_timeRec_fourth_subtitle'),
+            image: AssetImage('assets/images/dinner.png'),
+            keyword: 'dinner',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReadyToCookSection() {
+    // TODO: build
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: ListView(
+        children: <Widget>[
+          _buildGoodAfternoonText(),
+          _buildRecipesBasedOnTime(),
+        ],
+      ),
     );
   }
 }
